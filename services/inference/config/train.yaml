@@ -1,4 +1,4 @@
-model: services/inference/models/yolov26n.pt
+model: services/inference/models/yolo26n.pt
 data: services/inference/config/dataset.yaml
 
 training:
@@ -9,7 +9,7 @@ training:
   workers: 0
 
 run:
-  project: runs
+  project: .
   name: steel_defect_26n
   exist_ok: true
 

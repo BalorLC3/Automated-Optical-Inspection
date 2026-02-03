@@ -1,7 +1,7 @@
 task: detect
 mode: train
-model: C:\Users\super\Desktop\Vasudeva\Xing\metal_yolov9\services\inference\models\yolov26n.pt
-data: C:\Users\super\Desktop\Vasudeva\Xing\metal_yolov9\services\inference\config\dataset.yaml
+model: services/inference/models/yolo26n.pt
+data: services/inference/config/dataset.yaml
 epochs: 200
 time: null
 patience: 100
@@ -12,7 +12,7 @@ save_period: -1
 cache: false
 device: '0'
 workers: 0
-project: runs
+project: .
 name: steel_defect_26n
 exist_ok: true
 pretrained: true
@@ -106,4 +106,4 @@ auto_augment: randaugment
 erasing: 0.4
 cfg: null
 tracker: botsort.yaml
-save_dir: C:\Users\super\Desktop\Vasudeva\Xing\metal_yolov9\runs\detect\runs\steel_defect_26n
+save_dir: C:\Users\super\Desktop\Vasudeva\Xing\metal_yolov9\runs\detect\steel_defect_26n
