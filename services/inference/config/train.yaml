@@ -1,0 +1,17 @@
+model: services/inference/models/yolov26n.pt
+data: services/inference/config/dataset.yaml
+
+training:
+  epochs: 200
+  imgsz: 416
+  batch: 8
+  lr0: 0.001
+  workers: 0
+
+run:
+  project: runs
+  name: steel_defect_26n
+  exist_ok: true
+
+device: auto
+seed: 17

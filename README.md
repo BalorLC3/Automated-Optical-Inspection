@@ -1,3 +1,4 @@
+```m
 yolo-platform/
 │
 ├── services/
@@ -47,6 +48,9 @@ yolo-platform/
 │   └── deployment.md
 │
 └── README.md
-
+```
 
 Kubernetes-based modular AOI platform combining C++ real-time vision, Python ML inference, and Go-based IIoT backend for manufacturing environments.
+
+# References
+https://arxiv.org/html/2509.25659v1#S1

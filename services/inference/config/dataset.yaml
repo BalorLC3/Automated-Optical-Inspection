@@ -1,0 +1,12 @@
+path: C:/Users/super/Desktop/Vasudeva/Xing/metal_yolov9/data/processed  # Root data directory
+train: train/images         # Train images (relative to 'path')
+val: valid/images           # Val images (relative to 'path')
+# Classes
+nc: 6  # number of classes
+names:
+  0: crazing
+  1: inclusion
+  2: patches
+  3: pitted_surface
+  4: rolled-in_scale
+  5: scratches

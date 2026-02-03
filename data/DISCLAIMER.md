@@ -1,5 +1,5 @@
 # Reference
-The dataset used for this project is NEU-DET (Northeastern University (NEU) surface defect database) and is located at `data/raw` of the repository. The data is processed and saved in `data/processed`.
+The dataset used for this project is NEU-DET (Northeastern University (NEU) surface defect database) and is located at `data/raw` of the repository. The data is processed and saved in `data/processed`. Data is publicily available in [\[this link\]()](http://faculty.neu.edu.cn/songkechen/zh_CN/zdylm/263270/list/index.htm).
 
 ```bibtex
 @article{he2019end,
