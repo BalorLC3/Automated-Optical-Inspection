@@ -2,44 +2,54 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from ultralytics import YOLO
 from PIL import Image
 import io
-import torch
+import os
+import logging 
 
-app = FastAPI(title="YOLOv10 Inference Service")
+app = FastAPI(title="YOLO Inference Service")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+)
+logger = logging.getLogger('inference-service')
 
-# Load model once at startup
-# Path assumes you run this from services/inference-py/
-# Point this to your trained weights: "runs/steel_defect_v10/weights/best.pt"
-MODEL_PATH = "yolov10n.pt" 
+# inside the container, we will map the volume to /app/runs
+MODEL_PATH = "runs/detect/runs/steel_defect_26n/weights/best.pt"
+
+print(f"Loading model from: {os.path.abspath(MODEL_PATH)}")
+
 try:
     model = YOLO(MODEL_PATH)
-    print(f"Model loaded from {MODEL_PATH}")
+    logger.info(f"Model loaded successfully.")
 except Exception as e:
-    print(f"Error loading model: {e}")
-    exit(1)
+    logger.critical(f"Error loading model: {e}")
+    model = None
 
 @app.get("/health")
 def health():
+    if model is None:
+        return {"status": "error", "message": "Model not loaded"}
     return {"status": "ok", "device": str(model.device)}
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
-    # 1. Validation
+    if model is None:
+        raise HTTPException(status_code=500, detail="Model is not loaded")
+
+    # Validation
     if file.content_type not in ["image/jpeg", "image/png"]:
         raise HTTPException(status_code=400, detail="Invalid file type")
 
-    # 2. Read Image
+    # Read Image
     image_bytes = await file.read()
     image = Image.open(io.BytesIO(image_bytes))
 
-    # 3. Inference
-    # conf=0.25 is a standard confidence threshold
+    # Inference
     results = model.predict(image, conf=0.25)
 
-    # 4. Format Results for Go Backend
+    # Format Results for Go Backend
     detections = []
     for result in results:
         for box in result.boxes:
-            # YOLOv10 outputs: [x1, y1, x2, y2, confidence, class_id]
             x1, y1, x2, y2 = box.xyxy[0].tolist()
             confidence = float(box.conf[0])
             class_id = int(box.cls[0])
@@ -59,7 +69,7 @@ async def predict(file: UploadFile = File(...)):
 
     return {"filename": file.filename, "detections": detections}
 
+# Allow running directly with 'python serve.py' for debugging
 if __name__ == "__main__":
     import uvicorn
-    # Run on port 8000
     uvicorn.run(app, host="0.0.0.0", port=8000)

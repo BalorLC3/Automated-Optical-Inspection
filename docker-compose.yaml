@@ -1,0 +1,26 @@
+services:
+  backend:
+    build: ./services/backend
+    container_name: yolo_backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data  # Shared data folder
+    depends_on:
+      - inference
+
+  inference:
+    build: ./services/inference
+    container_name: yolo_inference
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./runs:/app/runs  # Access to trained weights
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

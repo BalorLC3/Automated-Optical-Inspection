@@ -1,4 +1,4 @@
-path: C:/Users/super/Desktop/Vasudeva/Xing/metal_yolov9/data/processed  # Root data directory
+path: data/processed  # Root data directory
 train: train/images         # Train images (relative to 'path')
 val: valid/images           # Val images (relative to 'path')
 # Classes
