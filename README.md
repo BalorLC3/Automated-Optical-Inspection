@@ -13,4 +13,5 @@ The backend is written in Go, then Go sends data to Python where inference is ma
 ## Demo
 1. Ingest the system with a image
 2. Get a response
-<img src="docs/defect-detection.png" width="500" />
+
+| <img src="docs/defect-detection.png" width="500" /> |
