@@ -1,17 +1,61 @@
-## What is Automated Optical Inspection (AOI)?
-In industries there is a continuous need of automating tasks and continuous improvement. Detect failures to ensure quality is a must do in any industry. In this project I designed a system which ingests data and detects the type of failure in metal sheets
+## Automated Optical Inspection (AOI)
 
-* Inference of 120ms
-* Low latency
-* Good predictions
+Automated Optical Inspection (AOI) systems are widely used in manufacturing environments to ensure product quality through early defect detection. As production volumes increase, manual inspection becomes inefficient, inconsistent, and costly. AOI enables **fast, repeatable, and objective quality control** by leveraging computer vision models in real time.
 
-Here I used YOLO26 (the most recent version of YOLO) as the computer vision algorithm, which got a high F1-score of 80% after low training effort
+This project implements an end-to-end AOI pipeline for **metal surface defect detection**, capable of ingesting images, performing inference, and presenting inspection results through a lightweight SCADA-style interface.
 
-## Structure
-The backend is written in Go, then Go sends data to Python where inference is made and lastly the user can get the output in a small SCADA like web-page written in react.
+### Key Features
 
-## Demo
-1. Ingest the system with a image
-2. Get a response
+* ⚡ **~120 ms inference latency**
+* 🟢 **Low end-to-end response time**
+* 🎯 **Reliable defect classification**
+* 📊 Clear PASS / FAIL quality decision logic
 
-<img src="docs/defect-detection.png" width="700" />
+The system uses **YOLOv26** (latest YOLO generation) for object detection, achieving an **F1-score of ~70%** with relatively low training effort.
+
+
+## System Architecture
+
+The platform is composed of three decoupled services:
+
+* **Frontend (React)**
+  A lightweight SCADA-style web interface for image upload, visualization, and inspection results.
+
+* **Backend (Go)**
+  Handles image ingestion, file storage, orchestration, quality control logic, and communication between services.
+
+* **Inference Service (Python + YOLO)**
+  Performs computer vision inference and returns structured detection results.
+
+
+## Demo Workflow
+
+1. Upload a metal surface image
+2. The system performs inference and quality evaluation
+3. Defects are visualized with bounding boxes
+4. A PASS / FAIL decision is returned to the operator
+
+<p align="center">
+  <img src="docs/defect-detection.png" width="700" />
+</p>
+
+
+## Trained Model Results
+
+| Prediction                                          | Validation                                          |
+| --------------------------------------------------- | --------------------------------------------------- |
+| <img src="docs/defect-detection.png" width="300" /> | <img src="docs/defect-detection.png" width="300" /> |
+
+The model detects surface defects such as **crazing, inclusions, and scratches**, returning bounding boxes, confidence scores, and class labels for downstream quality control logic.
+
+
+## Future work
+Usually the hardest part of these systems is the collection and labeling of data. This step would require a **vision** service, which could be implemented using C++.
+
+### Notes
+
+* Designed with **industrial AOI constraints** in mind (latency, robustness, modularity)
+* Easily extensible to new defect classes or additional inspection stages
+* Ready for containerized deployment (Docker / Compose)
+
+
