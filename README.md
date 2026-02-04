@@ -42,9 +42,9 @@ The platform is composed of three decoupled services:
 
 ## Trained Model Results
 
-| Prediction                                          | Validation                                          |
+| Prediction                                          | Actual Labels                                       |
 | --------------------------------------------------- | --------------------------------------------------- |
-| <img src="docs/defect-detection.png" width="300" /> | <img src="docs/defect-detection.png" width="300" /> |
+| <img src="runs\detect\steel_defect_26n\val_batch2_pred.jpg" width="300" /> | <img src="runs\detect\steel_defect_26n\val_batch2_labels.jpg" width="300" /> |
 
 The model detects surface defects such as **crazing, inclusions, and scratches**, returning bounding boxes, confidence scores, and class labels for downstream quality control logic.
 
