@@ -1,56 +1,16 @@
-```m
-yolo-platform/
-│
-├── services/
-│   ├── vision-cpp/          # C++ camera + preprocessing (edge)
-│   │   ├── src/
-│   │   ├── include/
-│   │   ├── config/
-│   │   ├── CMakeLists.txt
-│   │   ├── k8s.yaml
-│   │   └── README.md
-│   │
-│   ├── inference-py/        # Python YOLO training & inference
-│   │   ├── src/             # train.py, serve.py, eval.py
-│   │   ├── models/
-│   │   ├── requirements.txt
-│   │   ├── k8s.yaml
-│   │   └── README.md
-│   │
-│   └── backend-go/          # Go IIoT backend / API / MQTT
-│       ├── cmd/
-│       ├── internal/
-│       ├── api/             # OpenAPI / gRPC
-│       ├── mqtt/
-│       ├── k8s.yaml
-│       └── README.md
-│
-├── platform/                # Shared infrastructure (cluster-wide)
-│   ├── namespaces.yaml
-│   ├── ingress.yaml
-│   ├── mqtt.yaml            # Mosquitto / EMQX
-│   ├── monitoring.yaml      # Prometheus / Grafana
-│   └── storage.yaml
-│
-├── env/                     # Environment overlays
-│   ├── dev/
-│   ├── staging/
-│   └── prod/
-│
-├── scripts/
-│   ├── build.sh
-│   ├── deploy.sh
-│   └── teardown.sh
-│
-├── docs/
-│   ├── architecture.md
-│   ├── dataflow.md
-│   └── deployment.md
-│
-└── README.md
-```
+## What is Automated Optical Inspection (AOI)?
+In industries there is a continuous need of automating tasks and continuous improvement. Detect failures to ensure quality is a must do in any industry. In this project I designed a system which ingests data and detects the type of failure in metal sheets
 
-Kubernetes-based modular AOI platform combining C++ real-time vision, Python ML inference, and Go-based IIoT backend for manufacturing environments.
+* Inference of 120ms
+* Low latency
+* Good predictions
 
-# References
-https://arxiv.org/html/2509.25659v1#S1
+Here I used YOLO26 (the most recent version of YOLO) as the computer vision algorithm, which got a high F1-score of 80% after low training effort
+
+## Structure
+The backend is written in Go, then Go sends data to Python where inference is made and lastly the user can get the output in a small SCADA like web-page written in react.
+
+## Demo
+1. Ingest the system with a image
+2. Get a response
+<img src="docs/defect-detection.png" width="300" />
