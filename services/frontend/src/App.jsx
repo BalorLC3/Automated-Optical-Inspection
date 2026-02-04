@@ -50,8 +50,8 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen p-8 font-sans text-gray-800">
-      <header className="max-w-5xl mx-auto mb-10 text-center">
+    <div className="min-h-screen p-8 font-sans text-gray-800 flex flex-col items-center justify-center">
+      <header className="max-w-5xl mx-auto mb-10 flex justify-end">
         <h1 className="text-4xl font-bold text-gray-900 mb-2">Steel Defect Detection</h1>
         <p className="text-gray-500">Automated Optical Inspection (AOI) Pipeline</p>
       </header>
