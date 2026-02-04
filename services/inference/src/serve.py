@@ -13,7 +13,7 @@ logging.basicConfig(
 logger = logging.getLogger('inference-service')
 
 # inside the container, we will map the volume to /app/runs
-MODEL_PATH = "runs/detect/runs/steel_defect_26n/weights/best.pt"
+MODEL_PATH = "runs/detect/steel_defect_26n/weights/best.pt"
 
 print(f"Loading model from: {os.path.abspath(MODEL_PATH)}")
 
@@ -69,7 +69,7 @@ async def predict(file: UploadFile = File(...)):
 
     return {"filename": file.filename, "detections": detections}
 
-# Allow running directly with 'python serve.py' for debugging
+# for debugging
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

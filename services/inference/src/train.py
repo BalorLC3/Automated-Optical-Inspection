@@ -38,7 +38,7 @@ def train() -> None:
     model = YOLO(MODEL_PATH)
 
     model.train(
-        data=DATASET_YAML,                 # ✅ PATH, not dict
+        data=DATASET_YAML,                 
         device=get_device(cfg["device"]),
         **cfg["training"],
         **cfg["run"],

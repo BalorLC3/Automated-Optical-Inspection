@@ -1,26 +1,33 @@
 services:
+  # The Frontend (React + Nginx)
+  frontend:
+    build: ./services/frontend
+    container_name: yolo_frontend
+    ports:
+      - "3000:80" # Browser visits http://localhost:3000
+    depends_on:
+      - backend
+
+  # Backend (Go)
   backend:
     build: ./services/backend
     container_name: yolo_backend
     ports:
-      - "8080:8080"
+      - "8080:8080" # API available at http://localhost:8080
     volumes:
-      - ./data:/app/data  # Shared data folder
+      - ./data:/app/data # Shared data folder
     depends_on:
       - inference
+    environment:
+      - INFERENCE_URL=http://inference:8000/predict
 
+  # Brain (Python + YOLO)
   inference:
     build: ./services/inference
     container_name: yolo_inference
     ports:
       - "8000:8000"
     volumes:
+      - ./runs:/app/runs  
       - ./data:/app/data
-      - ./runs:/app/runs  # Access to trained weights
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+    

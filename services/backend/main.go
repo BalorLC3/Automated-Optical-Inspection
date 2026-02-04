@@ -8,6 +8,7 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
+	"net/textproto"
 	"os"
 	"path/filepath"
 	"time"
@@ -17,7 +18,7 @@ import (
 const (
 	Port         = ":8080"
 	UploadDir    = "./data/uploads"
-	InferenceURL = "http://inference:8000/predict" // "inference" is the docker service name
+	InferenceURL = "http://inference:8000/predict" // "inference" is the docker service name, for testing use localhost
 )
 
 // Response Structures
@@ -44,16 +45,19 @@ type APIResponse struct {
 	Success  bool               `json:"success"`
 	Message  string             `json:"message"`
 	ImageURL string             `json:"image_url"`
+	QCStatus string             `json:"qc_status"` // NEW: "PASS" or "FAIL"
 	Data     *InferenceResponse `json:"data,omitempty"`
 }
 
 func main() {
-	// 1. Ensure upload directory exists
+	// Ensure upload directory exists
 	if err := os.MkdirAll(UploadDir, 0755); err != nil {
 		log.Fatal("Could not create upload directory:", err)
 	}
 
-	// 2. Setup Routes
+	go startCleanupTicker() // When testing I created a lot of copies of images so this goroutine clean them up
+
+	// Setup Routes
 	http.HandleFunc("/api/process", enableCORS(handleProcess))
 
 	// Serve static files (images) so frontend can see them
@@ -121,10 +125,28 @@ func handleProcess(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	qcStatus := "PASS"
+	rejectionReason := ""
+
+	for _, detection := range inferenceResult.Detections {
+		if detection.Confidence > 0.50 {
+			qcStatus = "FAIL"
+			rejectionReason = fmt.Sprintf("Detected %s (%.1f%%)", detection.ClassName, detection.Confidence*100)
+
+			// Log to console
+			log.Printf("[ALERT] Quality Control Rejected: %s - Reason %s", filename, rejectionReason)
+			break
+		}
+	}
+	finalMessage := "Quality Control Paused"
+	if qcStatus == "FAIL" {
+		finalMessage = "Quality Control Failed: " + rejectionReason
+	}
 	// Return JSON response
 	response := APIResponse{
 		Success:  true,
-		Message:  "Processed successfully",
+		Message:  finalMessage,
+		QCStatus: qcStatus, // in frontend we will color code this
 		ImageURL: fmt.Sprintf("/data/uploads/%s", filename),
 		Data:     inferenceResult,
 	}
@@ -134,17 +156,27 @@ func handleProcess(w http.ResponseWriter, r *http.Request) {
 }
 
 // Helper to send image to Python
+// Helper to send image to Python
 func callPythonService(filename string, fileData []byte) (*InferenceResponse, error) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	part, err := writer.CreateFormFile("file", filename)
+	// 1. Detect the Content-Type (e.g., "image/jpeg") from the file bytes
+	contentType := http.DetectContentType(fileData)
+
+	// 2. Create the file part manually to set the Content-Type header
+	h := make(textproto.MIMEHeader)
+	h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="file"; filename="%s"`, filename))
+	h.Set("Content-Type", contentType)
+
+	part, err := writer.CreatePart(h)
 	if err != nil {
 		return nil, err
 	}
 	part.Write(fileData)
 	writer.Close()
 
+	// 3. Send Request
 	req, err := http.NewRequest("POST", InferenceURL, body)
 	if err != nil {
 		return nil, err
@@ -159,7 +191,9 @@ func callPythonService(filename string, fileData []byte) (*InferenceResponse, er
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("python service status: %s", resp.Status)
+		// Read body to see why it failed
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("python service status: %s | body: %s", resp.Status, string(bodyBytes))
 	}
 
 	var result InferenceResponse
@@ -168,6 +202,39 @@ func callPythonService(filename string, fileData []byte) (*InferenceResponse, er
 	}
 
 	return &result, nil
+}
+
+func startCleanupTicker() {
+	ticker := time.NewTicker(10 * time.Minute) // Run every 10 minutes
+	defer ticker.Stop()
+
+	for range ticker.C {
+		log.Println("Running cleanup task...")
+		files, err := os.ReadDir(UploadDir)
+		if err != nil {
+			log.Printf("Error reading upload dir: %v", err)
+			continue
+		}
+
+		cutoff := time.Now().Add(-15 * time.Minute) // Delete files older than 15 mins
+
+		for _, file := range files {
+			info, err := file.Info()
+			if err != nil {
+				continue
+			}
+
+			if info.ModTime().Before(cutoff) {
+				fullPath := filepath.Join(UploadDir, file.Name())
+				err := os.Remove(fullPath)
+				if err != nil {
+					log.Printf("Failed to delete %s: %v", file.Name(), err)
+				} else {
+					log.Printf("Deleted old file: %s", file.Name())
+				}
+			}
+		}
+	}
 }
 
 func jsonError(w http.ResponseWriter, message string, code int) {
