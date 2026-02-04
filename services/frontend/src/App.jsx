@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import ImageCanvas from './components/ImageCanvas';
 import StatusCard from './components/StatusCard';
 
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [processedImage, setProcessedImage] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -14,6 +14,7 @@ function App() {
     if (file) {
       setSelectedFile(file);
       setPreview(URL.createObjectURL(file));
+      setProcessedImage(null);
       setResult(null);
       setError(null);
     }
@@ -24,6 +25,7 @@ function App() {
 
     setLoading(true);
     setError(null);
+    setProcessedImage(null);
 
     const formData = new FormData();
     formData.append('image', selectedFile);
@@ -38,6 +40,11 @@ function App() {
 
       const data = await response.json();
       setResult(data);
+      
+      // Set processed image if available
+      if (data.data?.processedImage) {
+        setProcessedImage(data.data.processedImage);
+      }
     } catch (err) {
       console.error(err);
       setError('Failed to connect to server. Please check your connection.');
@@ -93,17 +100,30 @@ function App() {
           )}
         </div>
 
-        {/* RIGHT COLUMN: Visualizer */}
+        {/* RIGHT COLUMN: Image Display */}
         <div className="md:col-span-2">
           {!preview ? (
             <div className="text-gray-400 text-center">
               <p>No image selected</p>
             </div>
           ) : (
-            <ImageCanvas 
-              imageSrc={preview} 
-              detections={result?.data?.detections || []} 
-            />
+            <div className="canvas-container">
+              {processedImage ? (
+                // Show processed image with boxes
+                <img 
+                  src={processedImage} 
+                  alt="Processed with detections" 
+                  className="canvas-display"
+                />
+              ) : (
+                // Show original image
+                <img 
+                  src={preview} 
+                  alt="Original" 
+                  className="canvas-display"
+                />
+              )}
+            </div>
           )}
         </div>
 
