@@ -112,6 +112,6 @@ def draw_boxes_on_image(image, detections):
     
     return f"data:image/jpeg;base64,{img_base64}"
 
-if __name__ == "__main__":
+if __name__ == "__main__": # for development
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

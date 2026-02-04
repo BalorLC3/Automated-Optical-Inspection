@@ -18,7 +18,7 @@ import (
 const (
 	Port         = ":8080"
 	UploadDir    = "./data/uploads"
-	InferenceURL = "http://localhost:8000/predict"
+	InferenceURL = "http://backend:8000/predict" // for development use localhost:
 )
 
 // Response Structures
