@@ -13,7 +13,22 @@ This project implements an end-to-end AOI pipeline for **metal surface defect de
 
 The system uses **YOLOv26** (latest YOLO generation) for object detection, achieving an **F1-score of ~70%** with relatively low training effort.
 
+### A review of YOLO26
+I think the most interesting part of the newest model (it does not have a paper yet) is the use of MuSGD optimizer, for comparison classical SGD uses
+$$
+\theta_{t+1}=\theta_t - \eta \nabla L(\theta_t)
+$$
+which oscillates a lot. Using momentum SGD still has its limitations (i.e., may overshoot in non-convex regions). 
 
+In the other hand Muon uses gradient normalization and curve scaling
+$$
+\tilde{g}_t=\frac{g_t}{\|g_t\| + \epsilon}
+$$
+This stabilizes updates across layers of different scales (usually used in LLMs). YOLO26 blends SGD's generalization and Muon's stability, which look like
+$$
+v_t=\beta v_{t-1} + \mu \frac{\nabla L}{\|\nabla L\| + \epsilon}, \theta_{t+1}=\theta_t - \eta v_t
+$$
+this matter for detection because the detection loss is a sum of multiple of objectives, and may differ in magnitude. This leans to faster convergence. With __less tuning__ we get faster inference and better stability, go to [model webpage](https://docs.ultralytics.com/models/yolo26/#overview) for more information.
 ## System Architecture
 
 The platform is composed of three decoupled services:
@@ -44,7 +59,7 @@ The platform is composed of three decoupled services:
 
 | Prediction                                          | Actual Labels                                       |
 | --------------------------------------------------- | --------------------------------------------------- |
-| <img src="runs\detect\steel_defect_26n\val_batch2_pred.jpg" width="300" /> | <img src="runs\detect\steel_defect_26n\val_batch2_labels.jpg" width="300" /> |
+| <img src="runs\detect\steel_defect_26n\val_batch2_pred.jpg" width="500" /> | <img src="runs\detect\steel_defect_26n\val_batch2_labels.jpg" width="500" /> |
 
 The model detects surface defects such as **crazing, inclusions, and scratches**, returning bounding boxes, confidence scores, and class labels for downstream quality control logic.
 
