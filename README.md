@@ -52,7 +52,7 @@ The model detects surface defects such as **crazing, inclusions, and scratches**
 ## Future work
 Usually the hardest part of these systems is the collection and labeling of data. This step would require a **vision** service, which could be implemented using C++.
 
-## A review of YOLO26
+### A review of YOLO26
 I think the most interesting part of the newest model (it does not have a paper yet) is the use of MuSGD optimizer, for comparison classical SGD uses
 ```math
 \theta_{t+1}=\theta_t - \eta \nabla L(\theta_t)
