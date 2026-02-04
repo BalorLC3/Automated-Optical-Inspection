@@ -17,21 +17,28 @@ export default function ImageCanvas({ imageSrc, detections }) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(img, 0, 0);
 
-      // Draw detections (YOLO-style boxes)
+      // Draw detections with industrial style
       detections.forEach(det => {
         const { x, y, w, h, label, confidence } = det;
 
-        ctx.strokeStyle = "red";
-        ctx.lineWidth = 2;
+        // Draw bounding box
+        ctx.strokeStyle = "#ff3d00";
+        ctx.lineWidth = 3;
         ctx.strokeRect(x, y, w, h);
 
-        ctx.fillStyle = "red";
-        ctx.font = "14px sans-serif";
-        ctx.fillText(
-          `${label} (${(confidence * 100).toFixed(1)}%)`,
-          x,
-          y - 5
-        );
+        // Draw label background
+        const text = `${label} ${(confidence * 100).toFixed(1)}%`;
+        ctx.font = "bold 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+        const textMetrics = ctx.measureText(text);
+        const textWidth = textMetrics.width;
+        const textHeight = 20;
+
+        ctx.fillStyle = "#ff3d00";
+        ctx.fillRect(x, y - textHeight - 4, textWidth + 12, textHeight + 4);
+
+        // Draw label text
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(text, x + 6, y - 8);
       });
     };
 
@@ -39,9 +46,11 @@ export default function ImageCanvas({ imageSrc, detections }) {
   }, [imageSrc, detections]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="max-w-full h-auto border rounded-lg"
-    />
+    <div className="canvas-container">
+      <canvas
+        ref={canvasRef}
+        className="canvas-display"
+      />
+    </div>
   );
 }

@@ -1,16 +1,20 @@
 export default function StatusCard({ qcStatus, message }) {
-  const isPass = qcStatus === "PASS";
+  const isPass = qcStatus?.toLowerCase() === "pass";
 
   return (
-    <div
-      className={`p-4 rounded-xl text-center font-semibold shadow-md ${
-        isPass
-          ? "bg-green-100 text-green-800"
-          : "bg-red-100 text-red-800"
-      }`}
-    >
-      <div className="text-xl mb-1">{qcStatus}</div>
-      <div className="text-sm">{message}</div>
+    <div className="status-card">
+      {/* Status Bar */}
+      <div className={`status-bar ${isPass ? 'status-bar-pass' : 'status-bar-fail'}`} />
+      
+      {/* Card Content */}
+      <div className="status-content">
+        <div className={`status-label ${isPass ? 'status-ok' : 'status-error'}`}>
+          {qcStatus}
+        </div>
+        <div className="status-message">
+          {message}
+        </div>
+      </div>
     </div>
   );
 }

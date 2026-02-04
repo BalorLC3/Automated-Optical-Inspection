@@ -14,7 +14,7 @@ function App() {
     if (file) {
       setSelectedFile(file);
       setPreview(URL.createObjectURL(file));
-      setResult(null); // Reset previous results
+      setResult(null);
       setError(null);
     }
   };
@@ -29,64 +29,56 @@ function App() {
     formData.append('image', selectedFile);
 
     try {
-      // Connect to Go Backend
       const response = await fetch('http://localhost:8080/api/process', {
         method: 'POST',
         body: formData,
       });
 
-      if (!response.ok) {
-        throw new Error('Server error');
-      }
+      if (!response.ok) throw new Error('Server error');
 
       const data = await response.json();
       setResult(data);
     } catch (err) {
       console.error(err);
-      setError("Failed to connect to backend. Is Go running?");
+      setError('Failed to connect to server. Please check your connection.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen p-8 font-sans text-gray-800 flex flex-col items-center justify-center">
-      <header className="max-w-5xl mx-auto mb-10 flex justify-end">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Steel Defect Detection</h1>
-        <p className="text-gray-500">Automated Optical Inspection (AOI) Pipeline</p>
+    <>
+      {/* HEADER */}
+      <header className="w-full max-w-5xl text-center mb-10">
+        <h1>Steel Defect Detection</h1>
+        <p>Automated Optical Inspection (AOI)</p>
       </header>
 
-      <main className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+      {/* MAIN GRID */}
+      <main className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-8">
         
         {/* LEFT COLUMN: Controls */}
-        <div className="md:col-span-1 space-y-6">
-          <div className="bg-white p-6 rounded-xl shadow-md">
-            <h2 className="text-lg font-semibold mb-4">1. Upload Image</h2>
+        <div className="md:col-span-1 flex flex-col items-center space-y-6">
+          <div className="bg-white p-6 rounded-xl shadow-md w-full max-w-sm">
+            <h2>Upload Image</h2>
+            
             <input 
               type="file" 
               accept="image/*"
               onChange={handleFileChange}
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-blue-50 file:text-blue-700
-                hover:file:bg-blue-100 mb-4"
+              className="mb-4"
             />
             
             <button
               onClick={handleAnalyze}
               disabled={!selectedFile || loading}
-              className={`w-full py-3 px-4 rounded-lg font-bold text-white transition-colors
-                ${loading 
-                  ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-blue-600 hover:bg-blue-700 shadow-lg'}`}
+              className="w-full"
             >
               {loading ? 'Processing...' : 'Analyze Image'}
             </button>
             
             {error && (
-              <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm">
+              <div className="alert-error">
                 {error}
               </div>
             )}
@@ -94,19 +86,20 @@ function App() {
 
           {/* Results Summary */}
           {result && (
-             <StatusCard qcStatus={result.qc_status} message={result.message} />
+            <StatusCard 
+              qcStatus={result.qcStatus} 
+              message={result.message} 
+            />
           )}
         </div>
 
         {/* RIGHT COLUMN: Visualizer */}
-        <div className="md:col-span-2 bg-white p-6 rounded-xl shadow-md flex flex-col items-center justify-center min-h-[400px]">
-          {!preview && (
+        <div className="md:col-span-2">
+          {!preview ? (
             <div className="text-gray-400 text-center">
               <p>No image selected</p>
             </div>
-          )}
-
-          {preview && (
+          ) : (
             <ImageCanvas 
               imageSrc={preview} 
               detections={result?.data?.detections || []} 
@@ -115,7 +108,7 @@ function App() {
         </div>
 
       </main>
-    </div>
+    </>
   );
 }
 

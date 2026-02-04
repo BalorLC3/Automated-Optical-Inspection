@@ -18,7 +18,7 @@ import (
 const (
 	Port         = ":8080"
 	UploadDir    = "./data/uploads"
-	InferenceURL = "http://inference:8000/predict" // "inference" is the docker service name, for testing use localhost
+	InferenceURL = "http://localhost:8000/predict" // "inference" is the docker service name, for testing use localhost
 )
 
 // Response Structures
