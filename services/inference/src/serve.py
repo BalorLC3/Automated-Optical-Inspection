@@ -17,7 +17,7 @@ logger = logging.getLogger('inference-service')
 
 MODEL_PATH = "runs/detect/steel_defect_26n/weights/best.pt"
 
-print(f"Loading model from: {os.path.abspath(MODEL_PATH)}")
+logger.info(f"Loading model from: {os.path.abspath(MODEL_PATH)}")
 
 try:
     model = YOLO(MODEL_PATH)
