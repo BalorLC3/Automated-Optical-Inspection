@@ -39,7 +39,7 @@ type Detection struct {
 type InferenceResponse struct {
 	Filename       string      `json:"filename"`
 	Detections     []Detection `json:"detections"`
-	ProcessedImage string      `json:"processed_image"` // NEW: base64 image with boxes
+	ProcessedImage string      `json:"processed_image"` // base64 image with boxes
 }
 
 type APIResponse struct {
@@ -52,7 +52,7 @@ type APIResponse struct {
 
 type ResponseData struct {
 	Detections     []FrontendDetection `json:"detections"`
-	ProcessedImage string              `json:"processedImage"` // NEW: base64 image
+	ProcessedImage string              `json:"processedImage"` // base64 image
 }
 
 type FrontendDetection struct {
@@ -170,7 +170,7 @@ func handleProcess(w http.ResponseWriter, r *http.Request) {
 		ImageURL: fmt.Sprintf("/data/uploads/%s", filename),
 		Data: &ResponseData{
 			Detections:     frontendDetections,
-			ProcessedImage: inferenceResult.ProcessedImage, // NEW: pass through base64 image
+			ProcessedImage: inferenceResult.ProcessedImage, // pass through base64 image
 		},
 	}
 
