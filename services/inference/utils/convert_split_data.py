@@ -155,5 +155,5 @@ if __name__ == "__main__":
     # This script is in services/inference-py/utils, so root is 4 levels up
     ROOT_DIR = Path(__file__).resolve().parents[3]
     
-    # This function will handle finding, converting, and splitting your data
+    # This function will handle finding, converting, and splitting data
     process_and_split_data(ROOT_DIR, CLASSES, val_split=0.2)
