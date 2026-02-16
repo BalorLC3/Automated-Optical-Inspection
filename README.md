@@ -52,8 +52,8 @@ The model detects surface defects such as **crazing, inclusions, and scratches**
 ## Future work
 Usually the hardest part of these systems is the collection and labeling of data. This step would require a **vision** service, which could be implemented using C++.
 
-### A review of YOLO26
-I think the most interesting part of the newest model (it does not have a paper yet) is the use of MuSGD optimizer, for comparison classical SGD uses
+### The key idea
+An interesting part of a computer vision model is the design of the loss function. I use the MuSGD optimizer, for comparison classical SGD uses
 ```math
 \theta_{t+1}=\theta_t - \eta \nabla L(\theta_t)
 ```
@@ -67,7 +67,7 @@ This stabilizes updates across layers of different scales (usually used in LLMs)
 ```math
 v_t=\beta v_{t-1} + \mu \frac{\nabla L}{\|\nabla L\| + \epsilon}, \theta_{t+1}=\theta_t - \eta v_t
 ```
-this matter for detection because the detection loss is a sum of multiple of objectives, and may differ in magnitude. This leans to faster convergence. With __less tuning__ we get faster inference and better stability, go to [model webpage](https://docs.ultralytics.com/models/yolo26/#overview) for more information.
+this matter for detection because the detection loss is a sum of multiple of objectives, and may differ in magnitude. This leans to faster convergence. With __less tuning__ we get faster inference and better stability. 
 
 ### Notes
 
