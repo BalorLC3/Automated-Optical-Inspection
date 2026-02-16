@@ -11,8 +11,6 @@ This project implements an end-to-end AOI pipeline for **metal surface defect de
 * 🎯 **Reliable defect classification**
 * 📊 Clear PASS / FAIL quality decision logic
 
-The system uses **YOLOv26** (latest YOLO generation) for object detection, achieving an **F1-score of ~70%** with relatively low training effort.
-
 
 ## System Architecture
 
@@ -24,7 +22,7 @@ The platform is composed of three decoupled services:
 * **Backend (Go)**
   Handles image ingestion, file storage, orchestration, quality control logic, and communication between services.
 
-* **Inference Service (Python + YOLO)**
+* **Inference Service (Python)**
   Performs computer vision inference and returns structured detection results.
 
 
@@ -63,7 +61,7 @@ In the other hand Muon uses gradient normalization and curve scaling
 ```math
 \tilde{g}_t=\frac{g_t}{\|g_t\| + \epsilon}
 ```
-This stabilizes updates across layers of different scales (usually used in LLMs). YOLO26 blends SGD's generalization and Muon's stability, which look like
+This stabilizes updates across layers of different scales (usually used in LLMs). The presented model blends SGD's generalization and Muon's stability, which look like
 ```math
 v_t=\beta v_{t-1} + \mu \frac{\nabla L}{\|\nabla L\| + \epsilon}, \theta_{t+1}=\theta_t - \eta v_t
 ```
