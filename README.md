@@ -51,6 +51,13 @@ The model detects surface defects such as **crazing, inclusions, and scratches**
 Usually the hardest part of these systems is the collection and labeling of data. This step would require a **vision** service, which could be implemented using C++.
 
 ### The key idea
+#### ResNet
+By using this well known architecture in the `notebook` folder I revised how well does a general classification model performs in the dataset. Because the backbone of YOLO is around Residual Networks, we expect a similar result in performance. The results of the ResNet can be visualized in a tensorboard. And they look like this
+<p align="center">
+  <img src="docs/resultsResNetTrain.png" width="700" />
+</p>
+
+#### YOLO26
 An interesting part of a computer vision model is the design of the loss function. I use the MuSGD optimizer, for comparison classical SGD uses
 ```math
 \theta_{t+1}=\theta_t - \eta \nabla L(\theta_t)
