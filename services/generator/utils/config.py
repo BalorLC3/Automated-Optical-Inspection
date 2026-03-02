@@ -1,15 +1,15 @@
 from dataclasses import dataclass
 
 @dataclass
-class GANConfiguration:
+class GANConfig:
     # Hypeparameters
     padding: int = 0
     kernel: int = 3
-    num_layers: int = 3
+    num_layers: int = 3 # Num layers per stage
     filters_per_conv: int = 64    
 
     # Pyramid parameters
-    channels: int = 3
+    channels: int = 3 # Number of channels
     additive_noise: float = 0.1
     min_size: int = 25
     max_size: int = 250

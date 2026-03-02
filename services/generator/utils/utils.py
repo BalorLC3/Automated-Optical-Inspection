@@ -9,7 +9,9 @@ import random
 import datetime
 from torchvision.transforms import v2
 import torch.nn.functional as F
+from pathlib import Path
 
+from services.generator.utils.config import GANConfig
 
 def get_device(device: torch.device | str = "auto") -> torch.device:
     '''
@@ -99,18 +101,22 @@ def upsampling(img: torch.Tensor, sx: int, sy: int) -> torch.tensor:
 def save_image(name: str, img: torch.Tensor):
     plt.imsave(name, _image_to_numpy(img), vmin = 0, vmax= 1)
 
-def sample_random_noise(depth: int, reals_shapes, opt):
+def sample_random_noise(depth: int, reals_shapes: tuple[tuple], opt: GANConfig):
     noise = []
     for d in range(depth - 1):
         if d == 0:
             noise.append(generate_noise(
-                size = [opt.nc_im, reals_shapes[d][2], reals_shapes[d][3]],
+                size = [opt.channels, reals_shapes[d][2], reals_shapes[d][3]],
                 device = opt.device
-                ).detach()
-            )
+            ).detach()
+        )
         else:
-            if opt.train_mode == 'generation':
-                ...
+            # In generation mode
+            noise.append(generate_noise(
+                size = [opt.filters_per_conv, reals_shapes[d][2] + opt.num_layers * 2, reals_shapes[d][3] + opt.num_layers * 2],
+                device=opt.device
+            ).detach()
+        )
 
 class Augment:
     def __init__(self):
