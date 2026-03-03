@@ -2,6 +2,9 @@ from dataclasses import dataclass
 
 @dataclass
 class GANConfig:
+    # Hardware
+    device: float = 'auto'
+
     # Hypeparameters
     padding: int = 0
     kernel: int = 3
