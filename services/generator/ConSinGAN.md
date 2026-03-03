@@ -71,10 +71,10 @@ In ConSinGAN the generator **G** maps a noise tensor **z** to an image patch. Un
 
 The default noise is sampled at a coarser resolution and then upsampled:
 
-```
-z ~ N(0, I),   shape (B, C, H/s, W/s)
-z_up = Upsample(z, H, W)
-```
+$$
+z \sim N(0, I),  \quad \text{shape} (B, C, H/s, W/s) \\[2mm]
+z_{up} = \text{Upsample}(z, H, W)
+$$
 
 This spatial downscaling (controlled by `scale`) introduces low-frequency correlations. Higher values of `scale` give smoother, more globally-coherent noise - helping the generator produce coherent large-scale structure at finer pyramid levels.
 
@@ -141,7 +141,7 @@ A gradient norm greater than 1 means D is changing too fast (violating the Lipsc
 
 `torch.autograd.grad` computes the exact gradient through the discriminator forward pass. The norm is taken over the spatial + channel dimensions (`dim=1`), then squared and averaged over the batch.
 
-
+---
 ## 6  Scale Pyramid - `adjust_scales2image / create_reals_pyramid`
 
 ### 6.1  Why a pyramid?
@@ -180,6 +180,9 @@ $$
 \text{scale}_i  =  r ^ {(S − i)}
 $$
 
+
+---
+
 ## 7  Mask Dilation - `dilate_mask`
 
 In harmonisation and editing tasks the user provides a binary mask indicating the modified region. Dilating the mask gives the generator a margin around the pasted area so it can blend edges smoothly.
@@ -189,7 +192,7 @@ In harmonisation and editing tasks the user provides a binary mask indicating th
 A max-pool with kernel size `2r+1` and padding `r` computes the maximum value in a `(2r+1)×(2r+1)` neighbourhood at each position. For a binary mask this is equivalent to dilation with a square structuring element of radius r:
 
 $$
-\text{dilated}(x,y)  =  max_{|\Delta x|\le r, |\Delta y| \le r}  \text{mask}(x+\Delta x, y+ \Delta y)
+\text{dilated}(x,y)  =  \max_{|\Delta x|\le r, |\Delta y| \le r}  \text{mask}(x+\Delta x, y+ \Delta y)
 $$
 
 This approximates a disk kernel, is O(HW), and is hardware-accelerated via cuDNN.
@@ -203,7 +206,7 @@ This approximates a disk kernel, is O(HW), and is hardware-accelerated via cuDNN
 
 A Gaussian blur (kernel=11, σ=5) replaces the hard binary boundary with a smooth soft mask, producing a feather zone of ~10 pixels so the generator can blend seamlessly.
 
-
+---
 ## 8  GIF Animation (not actually needed for this project) - `generate_gif`
 
 ### 8.1  Goal
@@ -251,7 +254,7 @@ Rectangular patches are cut and pasted at a slightly displaced position within t
 
 Tile size and translation magnitude are **scaled down as tile count increases**, so the total disturbed area stays roughly constant across all configurations.
 
-
+---
 ## 10  Checkpoint I/O
 
 | Function | Purpose |

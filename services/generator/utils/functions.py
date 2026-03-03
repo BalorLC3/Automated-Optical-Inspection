@@ -1,14 +1,3 @@
-"""
-functions.py - ConSinGAN utility module (2026 rewrite)
-======================================================
-Replaces all skimage and albumentations dependencies with
-pure-PyTorch / torchvision equivalents.
-
-Dependencies
-------------
-torch, torchvision, numpy, matplotlib, imageio, scipy
-"""
-
 import os
 import math
 import copy
@@ -19,8 +8,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import imageio
 import matplotlib.pyplot as plt
+import cv2
 
 from torchvision.io import decode_image
 from torchvision.transforms.v2 import (
@@ -81,7 +70,7 @@ def set_seed(seed: int = 17) -> None:
         torch.cuda.manual_seed_all(seed)
 
 # Normalisation / denormalisation
-def norm(x: torch.Tensor) -> torch.Tensor:
+def _norm(x: torch.Tensor) -> torch.Tensor:
     """
     Map pixel values from [0, 1] → [-1, 1].
 
@@ -102,7 +91,7 @@ def norm(x: torch.Tensor) -> torch.Tensor:
     return (x - 0.5).mul_(2).clamp_(-1, 1)
 
 
-def denorm(x: torch.Tensor) -> torch.Tensor:
+def _denorm(x: torch.Tensor) -> torch.Tensor:
     """
     Inverse of :func:`norm`: map [-1, 1] → [0, 1].
 
@@ -144,7 +133,7 @@ def image_to_numpy(inp: torch.Tensor) -> np.ndarray:
     ValueError
         If the channel dimension is neither 1 nor 3.
     """
-    inp = denorm(inp).detach().cpu()
+    inp = _denorm(inp).detach().cpu()
 
     if inp.shape[1] == 3:
         return inp[-1].numpy().transpose(1, 2, 0).clip(0, 1)
@@ -152,25 +141,6 @@ def image_to_numpy(inp: torch.Tensor) -> np.ndarray:
         return inp[-1, 0].numpy().clip(0, 1)
     else:
         raise ValueError(f"Expected 1 or 3 channels, got {inp.shape[1]}")
-
-
-def torch2uint8(x: torch.Tensor) -> np.ndarray:
-    """
-    Convert a single image tensor to a uint8 NumPy array.
-
-    Takes the first sample (index 0) and maps [-1, 1] → [0, 255].
-
-    Parameters
-    ----------
-    x : torch.Tensor  - shape ``(1, C, H, W)``
-
-    Returns
-    -------
-    np.ndarray  - shape ``(H, W, C)``, dtype uint8
-    """
-    x = x[0].permute(1, 2, 0)          # (C, H, W) → (H, W, C)
-    x = denorm(x).mul(255).cpu().numpy()
-    return x.astype(np.uint8)
 
 # Image I/O
 def read_image(path: str, config: GANConfig) -> torch.Tensor:
@@ -203,7 +173,7 @@ def read_image(path: str, config: GANConfig) -> torch.Tensor:
         raise ValueError("channels must be 1 or 3")
 
     x = x.unsqueeze(0).float().div(255.0)   # (1, C, H, W) in [0, 1]
-    return norm(x)
+    return _norm(x)
 
 
 def read_image_dir(path: str, config: GANConfig) -> torch.Tensor:
@@ -379,9 +349,7 @@ def calc_gradient_penalty(
     Theory
     ------
     Wasserstein GAN with Gradient Penalty (Gulrajani et al., 2017) enforces
-    the 1-Lipschitz constraint on the discriminator D by penalising deviations
-    of ‖∇D(x̂)‖₂ from 1, where x̂ is a random convex interpolation between
-    a real and a fake sample:
+    the 1-Lipschitz constraint on the discriminator D by penalising deviations of ‖∇D(x̂)‖₂ from 1, where x̂ is a random convex interpolation between a real and a fake sample:
 
         x̂ = ε · x_real + (1 - ε) · x_fake,   ε ~ Uniform[0, 1]
 
@@ -640,9 +608,7 @@ def post_config(config: GANConfig) -> GANConfig:
     -------
     GANConfig  - same object, mutated in-place and returned
     """
-    config.device = torch.device(
-        "cpu" if config.not_cuda else f"cuda:{config.gpu}"
-    )
+    config.device = get_device(config.device)
     config.noise_amp_init = config.noise_amp
     config.timestamp = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 
@@ -757,7 +723,7 @@ def dilate_mask(mask: torch.Tensor, config: GANConfig) -> torch.Tensor:
 # Augmentation
 class Augment:
     """
-    On-the-fly stochastic augmentation pipeline (torchvision, no albumentations).
+    On-the-fly stochastic augmentation pipeline.
 
     A new random pipeline is built on every call so that the strength and
     number of erasing patches varies per-sample.
@@ -852,6 +818,16 @@ def shuffle_grid(image: np.ndarray, max_tiles: int = 5) -> np.ndarray:
     return new_image
 
 
+def save_video(out_path: str, frames: list[np.ndarray], fps: int):
+    h, w, _ = frames[0].shape
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    writer = cv2.VideoWriter(out_path, fourcc, fps, (w, h))
+
+    for f in frames:
+        writer.write(cv2.cvtColor(f, cv2.COLOR_RGB2BGR))
+
+    writer.release()
+
 def generate_gif(
     dir2save: str,
     netG: nn.Module,
@@ -900,7 +876,7 @@ def generate_gif(
     None  - writes a .gif file to ``dir2save``
     """
     def _to_frame(t: torch.Tensor) -> np.ndarray:
-        t = denorm(t).detach()[0].cpu().numpy().transpose(1, 2, 0)
+        t = _denorm(t).detach()[0].cpu().numpy().transpose(1, 2, 0)
         return (t * 255).astype(np.uint8)
 
     reals_shapes = [r.shape for r in reals]
@@ -929,7 +905,8 @@ def generate_gif(
     out_path = os.path.join(
         dir2save, f"start_scale={start_scale}_alpha={alpha}_beta={beta}.gif"
     )
-    imageio.mimsave(out_path, all_frames, fps=fps)
+    save_video(out_path, all_frames, fps=fps)
+
 
 move_to_cpu: Callable[[torch.Tensor], torch.Tensor] = lambda t: t.to("cpu")
 move_to_gpu: Callable[[torch.Tensor], torch.Tensor] = (
