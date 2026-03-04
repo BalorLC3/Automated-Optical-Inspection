@@ -1,9 +1,17 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-
+import logging
 
 # NOTE: Consider using YAML files and a script to automatically generate
 #       runs next time 
+
+def create_logger(name: str = 'generation-service'):
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+    )
+    logger = logging.getLogger(name)
+    return logger
 
 @dataclass
 class GANConfig:
@@ -20,6 +28,7 @@ class GANConfig:
     filters_per_conv: int = 64
     activation: str = "relu"      # "relu" | "lrelu"
     lrelu_alpha: float = 0.05     # Slope for leaky ReLU (ignored if activation != "lrelu")
+    elu_alpha: float = 1.0
     batch_norm: bool = False
 
     # Training mode

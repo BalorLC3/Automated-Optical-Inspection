@@ -28,7 +28,7 @@ from torchvision.transforms.functional import (
 from typing import Callable
 
 from services.generator.utils.config import GANConfig
-from services.generator.utils.imresize import imresize
+from services.generator.utils.imresize import _imresize
 
 
 # ---------------------------------------------------------------------------
@@ -72,7 +72,7 @@ def set_seed(seed: int = 17) -> None:
 # Normalisation / denormalisation
 def _norm(x: torch.Tensor) -> torch.Tensor:
     """
-    Map pixel values from [0, 1] → [-1, 1].
+    Map pixel values from [0, 1] -> [-1, 1].
 
     Formula:  out = (x - 0.5) × 2,  clamped to [-1, 1].
 
@@ -93,7 +93,7 @@ def _norm(x: torch.Tensor) -> torch.Tensor:
 
 def _denorm(x: torch.Tensor) -> torch.Tensor:
     """
-    Inverse of :func:`norm`: map [-1, 1] → [0, 1].
+    Inverse of :func:`norm`: map [-1, 1] -> [0, 1].
 
     Formula:  out = (x + 1) / 2,  clamped to [0, 1].
 
@@ -147,7 +147,7 @@ def read_image(path: str, config: GANConfig) -> torch.Tensor:
     """
     Load an image from disk into a normalised float tensor.
 
-    Uses torchvision's ``decode_image`` (replaces skimage ``imread``).
+    Uses torchvision's ``decode_image``.
 
     Parameters
     ----------
@@ -362,7 +362,7 @@ def calc_gradient_penalty(
 
     Parameters
     ----------
-    discriminator : callable  - D(x) → scalar score
+    discriminator : callable  - D(x) -> scalar score
     real_data     : Tensor    - shape ``(B, C, H, W)``
     fake_data     : Tensor    - same shape as real_data
     lambda_       : float     - GP weight (typically 0.1 – 10)
@@ -429,7 +429,7 @@ def adjust_scales2image(
     config.scale1 = min(
         config.max_size / max(real_.shape[2], real_.shape[3]), 1.0
     )
-    real = imresize(real_, config.scale1, config)
+    real = _imresize(real_, config.scale1, config)
 
     config.stop_scale = config.train_stages - 1
     config.scale_factor = math.pow(
@@ -481,7 +481,7 @@ def create_reals_pyramid(
                 config.scale_factor,
                 ((S - 1) / math.log(S)) * math.log(S - i) + 1,
             )
-        reals.append(imresize(real, scale, config))
+        reals.append(_imresize(real, scale, config))
 
     reals.append(real)
     return reals
@@ -712,7 +712,7 @@ def dilate_mask(mask: torch.Tensor, config: GANConfig) -> torch.Tensor:
     """
     radius = 7 if config.train_mode == "harmonization" else 20
 
-    mask = mask[:, :1]                              # keep only first channel → (1,1,H,W)
+    mask = mask[:, :1]                              # keep only first channel -> (1,1,H,W)
     mask = _binary_dilation_torch(mask, radius)
     mask = gaussian_blur(mask, kernel_size=11, sigma=5.0)
     mask = mask.expand(1, 3, mask.shape[2], mask.shape[3])
@@ -852,8 +852,8 @@ def generate_gif(
         diff_t  = b·(z_{t-1} - z_{t-2}) + (1-B)·e_t     [momentum step]
         z_t     = a·z_fixed + (1-a)·(z_{t-1} + diff_t)   [anchor to fixed noise]
 
-    - ``beta``  controls smoothness: higher → slower, smoother motion.
-    - ``alpha`` controls attraction to the fixed noise: higher → less drift.
+    - ``beta``  controls smoothness: higher -> slower, smoother motion.
+    - ``alpha`` controls attraction to the fixed noise: higher -> less drift.
     - ``start_scale`` locks the coarser levels to fixed noise, animating
       only fine-scale details.
 

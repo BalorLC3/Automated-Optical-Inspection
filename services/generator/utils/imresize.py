@@ -7,14 +7,9 @@ from math import pi
 from scipy.ndimage import shift as ndimage_shift   
 from torchvision.transforms.functional import (
     rgb_to_grayscale,
-
 )
 
 from services.generator.utils.config import GANConfig
-from services.generator.utils.functions import (
-    _norm,
-    _denorm,
-)
 
 def _torch2uint8(x: torch.Tensor) -> np.ndarray:
     """
@@ -30,6 +25,7 @@ def _torch2uint8(x: torch.Tensor) -> np.ndarray:
     -------
     np.ndarray  - shape ``(H, W, C)``, dtype uint8
     """
+    from services.generator.utils.functions import _denorm
     x = x[0].permute(1, 2, 0)          # (C, H, W) → (H, W, C)
     x = _denorm(x).mul(255).cpu().numpy()
     return x.astype(np.uint8)
@@ -48,6 +44,7 @@ def _np2torch(x: np.ndarray, config: GANConfig) -> torch.Tensor:
     -------
     torch.Tensor  — shape ``(1, C, H, W)``, values in [−1, 1]
     """
+    from services.generator.utils.functions import _norm
     if config.channels == 3:
         # (H, W, C) uint8 → (1, C, H, W) float [0, 1]
         t = torch.from_numpy(x).permute(2, 0, 1).unsqueeze(0).float().div(255.0)
@@ -65,7 +62,7 @@ def _np2torch(x: np.ndarray, config: GANConfig) -> torch.Tensor:
     return _norm(t)
 
 
-def imresize(im: torch.Tensor, scale: float, config: GANConfig) -> torch.Tensor:
+def _imresize(im: torch.Tensor, scale: float, config: GANConfig) -> torch.Tensor:
     """
     Resize a tensor image by a scalar scale factor.
 
