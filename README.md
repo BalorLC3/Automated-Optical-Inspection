@@ -57,6 +57,7 @@ By using this well known architecture in the `notebook` folder I revised how wel
   <img src="docs/resultsResNetTrain.png" width="700" />
 </p>
 as we see the experiment got good results with small epochs, we expect that by using larger pixels the model generalizes better, but also requires more memory (training in a resolution of `32x32` is cheaper than `224x224`). However for the purpose of this project I understood what I wanted to understand. 
+
 #### YOLO26
 An interesting part of a computer vision model is the design of the loss function. YOLO26 use the MuSGD optimizer, for comparison classical SGD uses
 ```math
