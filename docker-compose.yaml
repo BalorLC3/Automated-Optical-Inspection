@@ -1,5 +1,4 @@
 services:
-  # The Frontend (React + Nginx)
   frontend:
     build: ./services/frontend
     container_name: yolo_frontend
